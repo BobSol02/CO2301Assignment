@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
+#include "Components/SceneCaptureComponent2D.h"
 #include "PlayerCharacter.generated.h"
 
 UCLASS()
@@ -23,9 +24,15 @@ protected:
 	UPROPERTY(EditAnywhere)
 	USkeletalMeshComponent* CharacterMesh;
 	UPROPERTY(EditAnywhere)
+	USkeletalMeshComponent* GunMesh;
+	UPROPERTY(EditAnywhere)
 	USpringArmComponent* SpringArm;
 	UPROPERTY(EditAnywhere)
 	UCameraComponent* Camera;
+	UPROPERTY(EditAnywhere)
+	USpringArmComponent* MapArm;
+	UPROPERTY(EditAnywhere)
+	USceneCaptureComponent2D* MapCamera;
 	UFUNCTION()
 	virtual void CallForwards(float Value);
 	UFUNCTION()
@@ -36,6 +43,8 @@ protected:
 	virtual void CallTurn(float Value);
 	UFUNCTION()
 	virtual void CallJump();
+	UFUNCTION()
+	virtual void Shoot();
 
 public:
 	// Called every frame
