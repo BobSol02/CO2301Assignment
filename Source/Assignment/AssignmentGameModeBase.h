@@ -13,5 +13,19 @@ UCLASS()
 class ASSIGNMENT_API AAssignmentGameModeBase : public AGameModeBase
 {
 	GENERATED_BODY()
-	
+private:
+	UFUNCTION()
+	void StartGame();
+	UFUNCTION()
+	void GameOver(bool win);
+	UPROPERTY()
+	FTimerHandle Timer;
+	UPROPERTY(EditAnywhere)
+	float GameDuration = 0;
+	UFUNCTION()
+	void TimeUp();
+	UFUNCTION(BlueprintPure)
+	FString GetTime();
+protected:
+	virtual void BeginPlay() override;
 };

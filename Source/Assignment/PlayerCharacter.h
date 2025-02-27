@@ -21,6 +21,8 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+	// Components
 	UPROPERTY(EditAnywhere)
 	USkeletalMeshComponent* CharacterMesh;
 	UPROPERTY(EditAnywhere)
@@ -33,6 +35,8 @@ protected:
 	USpringArmComponent* MapArm;
 	UPROPERTY(EditAnywhere)
 	USceneCaptureComponent2D* MapCamera;
+
+	//Bindings
 	UFUNCTION()
 	virtual void CallForwards(float Value);
 	UFUNCTION()
@@ -43,9 +47,23 @@ protected:
 	virtual void CallTurn(float Value);
 	UFUNCTION()
 	virtual void CallJump();
+public:
+	//Declared public so that it can be accessed by BT_Fire task
 	UFUNCTION()
 	virtual void Shoot();
+protected:
+	// Variables
+	UPROPERTY(EditAnywhere)
+	int BulletDamage = 0;
+	UPROPERTY(EditAnywhere)
+	int Health = 0;
 
+	UFUNCTION()
+	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent,
+		AController* EventInstigator, AActor* DamageCauser) override;
+
+	UFUNCTION(BlueprintPure)
+	int GetHealth();
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
