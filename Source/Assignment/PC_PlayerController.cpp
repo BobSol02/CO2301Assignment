@@ -18,7 +18,21 @@ void APC_PlayerController::BeginPlay() {
 		if (!NumberOfBullets) {
 			NumberOfBullets = 50;
 		}
+		// If the number of grenades has not been altered from the editor, set to a default value of 5
+		if (!NumberOfGrenades) {
+			NumberOfGrenades = 5;
+		}
 		SetupLevelHUD();
+	}
+	if (UGameplayStatics::GetCurrentLevelName(GetWorld()) == "GameWon") {
+		GameWonScreen = CreateWidget(this, GameWonScreenClass);
+		if (GameWonScreen != nullptr)
+			GameWonScreen->AddToViewport();
+	}
+	if (UGameplayStatics::GetCurrentLevelName(GetWorld()) == "GameOver") {
+		GameOverScreen = CreateWidget(this, GameOverScreenClass);
+		if (GameOverScreen != nullptr)
+			GameOverScreen->AddToViewport();
 	}
 }
 
@@ -42,13 +56,13 @@ void APC_PlayerController::SetupLevelHUD() {
 }
 
 /*
-* Start Game Function
+* StartGame Function
 * Called from blueprints. Begins the game.
 */
 void APC_PlayerController::StartGame() {
 	if (UGameplayStatics::GetCurrentLevelName(GetWorld()) != "Level") {
-		//UE_LOG(LogTemp, Warning, TEXT("Cool: %s"), *UGameplayStatics::GetCurrentLevelName(GetWorld()));
-		StartScreen->RemoveFromViewport();
+		if (StartScreen != nullptr)
+			StartScreen->RemoveFromViewport();
 		UGameplayStatics::OpenLevel(GetWorld(), "Level");
 	}
 }
@@ -76,4 +90,32 @@ int APC_PlayerController::GetBullets() {
 */
 void APC_PlayerController::SetBullets(int num) {
 	NumberOfBullets = num;
+}
+
+/*
+* MainMenu Function
+* Called from blueprints. Goes to main menu
+*/
+void APC_PlayerController::MainMenu() {
+	if (GameWonScreen != nullptr)
+		GameWonScreen->RemoveFromViewport();
+	if (GameOverScreen != nullptr)
+		GameOverScreen->RemoveFromViewport();
+	UGameplayStatics::OpenLevel(GetWorld(), "Start");
+}
+
+/*
+* GetGrenades function
+* Called from blueprints. Returns number of grenades.
+*/
+int APC_PlayerController::GetGrenades() {
+	return NumberOfGrenades;
+}
+
+/*
+* SetGrenades function
+* Used from other classes. Sets number of grenades to a new value.
+*/
+void APC_PlayerController::SetGrenades(int num) {
+	NumberOfGrenades = num;
 }

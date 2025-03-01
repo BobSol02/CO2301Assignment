@@ -18,7 +18,7 @@ void UBTService_FireFromRange::TickNode(UBehaviorTreeComponent& OwnerComp, uint8
 	
 	UE_LOG(LogTemp, Warning, TEXT("%s"), *FString::SanitizeFloat(EnemyAIController->GetPawn()->GetDistanceTo(PlayerPawn)));
 
-	if (EnemyAIController->GetPawn()->GetDistanceTo(PlayerPawn)<500.0f) {
+	if (EnemyAIController->GetPawn()->GetDistanceTo(PlayerPawn)<1000.0f) {
 		OwnerComp.GetBlackboardComponent()->SetValueAsBool(GetSelectedBlackboardKey(), true);
 	}
 	else {

@@ -6,6 +6,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Engine/EngineTypes.h"
 #include "PC_PlayerController.h"
+#include "AssignmentGameModeBase.h"
 
 // Sets default values
 APlayerCharacter::APlayerCharacter()
@@ -24,6 +25,8 @@ APlayerCharacter::APlayerCharacter()
 	MapArm->SetRelativeRotation(FRotator(-90.0f, 0, 0));
 	MapCamera = CreateDefaultSubobject<USceneCaptureComponent2D>(TEXT("Map Camera"));
 	MapCamera->SetupAttachment(MapArm);
+	ProjectileSpawnPoint = CreateDefaultSubobject<USceneComponent>(TEXT("Projectile Spawn Point"));
+	ProjectileSpawnPoint->SetupAttachment(CharacterMesh);
 
 	// If health not set in editor, set it to 100
 	if (!Health)
@@ -58,33 +61,60 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	PlayerInputComponent->BindAxis("Turn", this, &APlayerCharacter::CallTurn);
 	PlayerInputComponent->BindAction("Jump", EInputEvent::IE_Pressed, this, &APlayerCharacter::CallJump);
 	PlayerInputComponent->BindAction("Shoot", EInputEvent::IE_Pressed, this, &APlayerCharacter::Shoot);
+	PlayerInputComponent->BindAction("ThrowGrenade", EInputEvent::IE_Pressed, this, &APlayerCharacter::ThrowGrenade);
 }
 
+/*
+* CallForwards function
+* Moves character in the x direction relative to the character.
+*/
 void APlayerCharacter::CallForwards(float Value) {
 	this->AddMovementInput(GetActorForwardVector(), Value);
 }
 
+/*
+* CallStrafe function
+* Moves character in the y direction relative to the character.
+*/
 void APlayerCharacter::CallStrafe(float Value) {
 	this->AddMovementInput(GetActorRightVector(), Value);
 }
 
+/*
+* CallPitch function
+* Rotates camera up/down.
+*/
 void APlayerCharacter::CallPitch(float Value) {
 	this->AddControllerPitchInput(Value);
 }
 
+/*
+* CallTurn function
+* Rotates camera left/right.
+*/
 void APlayerCharacter::CallTurn(float Value) {
 	this->AddControllerYawInput(Value);
 }
 
+/*
+* CallJump function
+* Makes character jump.
+*/
 void APlayerCharacter::CallJump() {
 	this->Jump();
 }
 
+/*
+* Shoot function
+* Function handles shooting both for the player but also the ai.
+* When the player calls the function, it checks if there are enough bullets before shooting.
+* If the ai calls the function, it always shoots.
+*/
 void APlayerCharacter::Shoot() {
 	AController* ControllerRef = GetController();
 	if (ControllerRef->IsA(APC_PlayerController::StaticClass())) {
 		UE_LOG(LogTemp, Warning, TEXT("player"));
-		APC_PlayerController* playerController = (APC_PlayerController*)ControllerRef;
+		APC_PlayerController* playerController = Cast<APC_PlayerController>(ControllerRef);
 		int bullets = playerController->GetBullets();
 		if (bullets > 0)
 			playerController->SetBullets(bullets - 1);
@@ -95,9 +125,14 @@ void APlayerCharacter::Shoot() {
 	FRotator CameraRotation;
 	ControllerRef->GetPlayerViewPoint(CameraLocation, CameraRotation);
 	FVector end = CameraLocation + CameraRotation.Vector() * 10000.0f;
+	// Want to ignore who ever is the shooter.
+	FCollisionQueryParams params;
+	params.AddIgnoredActor(this);
 	FHitResult hit;
-	bool hitSomething = GetWorld()->LineTraceSingleByChannel(hit, CameraLocation, end, ECC_Visibility);
+	bool hitSomething = GetWorld()->LineTraceSingleByChannel(hit, CameraLocation, end, ECC_Visibility, params);
 	if (hitSomething) {
+		// Since ECC_Visibility channel can be blocked by non actor objects,
+		// check whether an actor was hit before applying damage.
 		if (hit.GetActor() != nullptr)
 			if (hit.GetActor()->GetClass()->IsChildOf(APlayerCharacter::StaticClass())) {
 				UE_LOG(LogTemp, Warning, TEXT("COOL"));
@@ -118,13 +153,15 @@ void APlayerCharacter::Shoot() {
 */
 float APlayerCharacter::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent,
 	AController* EventInstigator, AActor* DamageCauser) {
-	UE_LOG(LogTemp, Warning, TEXT("Instigator: %s, Causer: %s"), *EventInstigator->GetName(), *DamageCauser->GetName());
 	Health -= DamageAmount;
 	UE_LOG(LogTemp, Warning, TEXT("%d"), Health);
-	if (Health <= 0)
+	if (Health <= 0) {
+		if (this->GetController()->IsA(APC_PlayerController::StaticClass()))
+			Cast<AAssignmentGameModeBase>(UGameplayStatics::GetGameMode(this))->GameOver(false);
 		this->Destroy();
+	}
 	return DamageAmount;
-}
+} 
 
 /*
 * GetHealth function
@@ -132,4 +169,17 @@ float APlayerCharacter::TakeDamage(float DamageAmount, struct FDamageEvent const
 */
 int APlayerCharacter::GetHealth() {
 	return Health;
+}
+
+/*
+* ThrowGrenade function
+* Throw grenade
+*/
+void APlayerCharacter::ThrowGrenade() {
+	if (GrenadeClass) {
+		FVector SpawnLocation = ProjectileSpawnPoint->GetComponentLocation();
+		FRotator SpawnRotation = ProjectileSpawnPoint->GetComponentRotation();
+		AGrenade* Grenade = GetWorld()->SpawnActor<AGrenade>(GrenadeClass, SpawnLocation, SpawnRotation);
+		Grenade->SetOwner(this);
+	}
 }

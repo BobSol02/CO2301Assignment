@@ -7,6 +7,7 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Components/SceneCaptureComponent2D.h"
+#include "Grenade.h"
 #include "PlayerCharacter.generated.h"
 
 UCLASS()
@@ -35,6 +36,10 @@ protected:
 	USpringArmComponent* MapArm;
 	UPROPERTY(EditAnywhere)
 	USceneCaptureComponent2D* MapCamera;
+	UPROPERTY(EditAnywhere)
+	USceneComponent* ProjectileSpawnPoint;
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<AGrenade> GrenadeClass;
 
 	//Bindings
 	UFUNCTION()
@@ -47,6 +52,8 @@ protected:
 	virtual void CallTurn(float Value);
 	UFUNCTION()
 	virtual void CallJump();
+	UFUNCTION()
+	virtual void ThrowGrenade();
 public:
 	//Declared public so that it can be accessed by BT_Fire task
 	UFUNCTION()

@@ -16,8 +16,10 @@ class ASSIGNMENT_API AAssignmentGameModeBase : public AGameModeBase
 private:
 	UFUNCTION()
 	void StartGame();
+public:
 	UFUNCTION()
 	void GameOver(bool win);
+private:
 	UPROPERTY()
 	FTimerHandle Timer;
 	UPROPERTY(EditAnywhere)

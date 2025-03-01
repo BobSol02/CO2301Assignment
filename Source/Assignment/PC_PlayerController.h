@@ -59,13 +59,21 @@ private:
 	void StartGame();
 	UFUNCTION(BlueprintCallable)
 	void Exit();
+	UFUNCTION(BlueprintCallable)
+	void MainMenu();
 
 	// Player Variables
 	UPROPERTY(EditAnywhere)
 	int NumberOfBullets = 0;
+	UPROPERTY(EditAnywhere)
+	int NumberOfGrenades = 0;
 public:
 	UFUNCTION(BlueprintPure)
 	int GetBullets();
 	UFUNCTION()
 	void SetBullets(int num);
+	UFUNCTION(BlueprintPure)
+	int GetGrenades();
+	UFUNCTION()
+	void SetGrenades(int num);
 };

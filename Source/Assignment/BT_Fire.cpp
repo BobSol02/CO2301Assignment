@@ -18,7 +18,7 @@ EBTNodeResult::Type UBT_Fire::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uin
 	AActor* AIActor = OwnerComp.GetAIOwner()->GetPawn();
 
 	if (AIActor->IsA(APlayerCharacter::StaticClass())) {
-		APlayerCharacter* Character = (APlayerCharacter*)AIActor;
+		APlayerCharacter* Character = Cast<APlayerCharacter>(AIActor);
 		Character->Shoot();
 		UE_LOG(LogTemp, Warning, TEXT("Fire success"));
 		return EBTNodeResult::Succeeded;
