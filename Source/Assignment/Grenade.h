@@ -6,6 +6,11 @@
 #include "GameFramework/Actor.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Components/StaticMeshComponent.h"
+#include "Particles/ParticleSystem.h"
+#include "NiagaraFunctionLibrary.h"
+#include "NiagaraComponent.h"
+#include "NiagaraSystem.h"
+#include "PhysicsEngine/RadialForceComponent.h"
 #include "Grenade.generated.h"
 
 UCLASS()
@@ -30,10 +35,22 @@ private:
 	USkeletalMeshComponent* GrenadeMesh;
 	UPROPERTY(VisibleAnywhere)
 	UProjectileMovementComponent* ProjectileMovement;
+	UPROPERTY(VisibleAnywhere)
+	URadialForceComponent* RadialForce;
+	UPROPERTY(EditAnywhere)
+	UNiagaraSystem* ExplosionParticleSystem;
+	UPROPERTY()
+	FTimerHandle Timer;
+	UPROPERTY(EditAnywhere)
+	float ExplosionTimer = 0;
+	UFUNCTION()
+	void Explosion();
 	UPROPERTY(EditAnywhere)
 	float MovementSpeed = 0;
 	UPROPERTY(EditAnywhere)
 	float GrenadeDamage = 0;
-	UFUNCTION()
-	void OnHit(AActor* SelfActor, AActor* OtherActor, FVector NormalImpulse, const FHitResult& Hit);
+	UPROPERTY(EditAnywhere)
+	float ImpulseRadius = 0;
+	UPROPERTY(EditAnywhere)
+	float ImpulseStrength = 0;
 };

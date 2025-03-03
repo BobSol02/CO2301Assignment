@@ -117,7 +117,7 @@ void APlayerCharacter::Shoot() {
 		APC_PlayerController* playerController = Cast<APC_PlayerController>(ControllerRef);
 		int bullets = playerController->GetBullets();
 		if (bullets > 0)
-			playerController->SetBullets(bullets - 1);
+			playerController->SetBullets(bullets--);
 		else
 			return;
 	}
@@ -176,6 +176,15 @@ int APlayerCharacter::GetHealth() {
 * Throw grenade
 */
 void APlayerCharacter::ThrowGrenade() {
+	AController* ControllerRef = GetController();
+	if (ControllerRef == nullptr)
+		return;
+	APC_PlayerController* playerController = Cast<APC_PlayerController>(ControllerRef);
+	int grenades = playerController->GetGrenades();
+	if (grenades > 0)
+		playerController->SetGrenades(grenades - 1);
+	else
+		return;
 	if (GrenadeClass) {
 		FVector SpawnLocation = ProjectileSpawnPoint->GetComponentLocation();
 		FRotator SpawnRotation = ProjectileSpawnPoint->GetComponentRotation();
