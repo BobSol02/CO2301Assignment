@@ -4,10 +4,13 @@
 #include "PC_PlayerController.h"
 #include "Kismet/GameplayStatics.h"
 
+/*
+* BeginPlay function
+* Is loaded every time a new level starts. Loads different widgets depending on the level.
+*/
 void APC_PlayerController::BeginPlay() {
 	Super::BeginPlay();
 
-	//UE_LOG(LogTemp, Warning, TEXT("abc: %s"), *UGameplayStatics::GetCurrentLevelName(GetWorld()));
 	if (UGameplayStatics::GetCurrentLevelName(GetWorld()) == "Start") {
 		StartScreen = CreateWidget(this, StartScreenClass);
 		if (StartScreen != nullptr)

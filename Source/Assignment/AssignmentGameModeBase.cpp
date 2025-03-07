@@ -19,9 +19,9 @@ void AAssignmentGameModeBase::BeginPlay() {
 */
 void AAssignmentGameModeBase::StartGame() {
 	UE_LOG(LogTemp, Warning, TEXT("Start Game"));
-	// If game duration not set in editor, set it to 60
+	// If game duration not set in editor, set it to 300
 	if (!GameDuration)
-		GameDuration = 60.0f;
+		GameDuration = 300.0f;
 	GetWorld()->GetTimerManager().SetTimer(Timer, this, &AAssignmentGameModeBase::TimeUp, GameDuration, false);
 }
 

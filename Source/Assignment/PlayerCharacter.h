@@ -40,6 +40,8 @@ protected:
 	USceneComponent* ProjectileSpawnPoint;
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<AGrenade> GrenadeClass;
+	UPROPERTY(EditAnywhere)
+	USoundBase* GunShotSound;
 
 	//Bindings
 	UFUNCTION()
@@ -72,8 +74,6 @@ protected:
 	UFUNCTION(BlueprintPure)
 	int GetHealth();
 public:
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;

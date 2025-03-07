@@ -7,14 +7,19 @@
 #include "Engine/EngineTypes.h"
 #include "PC_PlayerController.h"
 #include "AssignmentGameModeBase.h"
+#include "EnemyAIController.h"
 
-// Sets default values
+/*
+* APlayerCharacter constructor
+* Sets default values.
+*/
 APlayerCharacter::APlayerCharacter()
 {
 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
 	CharacterMesh = GetMesh();
 	GunMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Gun Mesh"));
+	// Attach Gun to hand socket.
 	GunMesh->AttachToComponent(CharacterMesh, FAttachmentTransformRules::KeepRelativeTransform, FName(TEXT("hand_rSocket")));
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("Spring Arm"));
 	SpringArm->SetupAttachment(CharacterMesh);
@@ -27,6 +32,7 @@ APlayerCharacter::APlayerCharacter()
 	MapCamera->SetupAttachment(MapArm);
 	ProjectileSpawnPoint = CreateDefaultSubobject<USceneComponent>(TEXT("Projectile Spawn Point"));
 	ProjectileSpawnPoint->SetupAttachment(CharacterMesh);
+	GunShotSound = CreateDefaultSubobject<USoundBase>(TEXT("Gun Shot Sound"));
 
 	// If health not set in editor, set it to 100
 	if (!Health)
@@ -37,21 +43,20 @@ APlayerCharacter::APlayerCharacter()
 		BulletDamage = 20;
 }
 
-// Called when the game starts or when spawned
+/*
+* BeginPlay function
+* Called when the game starts or when spawned.
+*/
 void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
 }
 
-// Called every frame
-void APlayerCharacter::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-}
-
-// Called to bind functionality to input
+/*
+* SetupPlayerInputComponent function
+* Called to bind functionality to input.
+*/
 void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
@@ -117,10 +122,15 @@ void APlayerCharacter::Shoot() {
 		APC_PlayerController* playerController = Cast<APC_PlayerController>(ControllerRef);
 		int bullets = playerController->GetBullets();
 		if (bullets > 0)
-			playerController->SetBullets(bullets--);
+			playerController->SetBullets(--bullets);
 		else
 			return;
 	}
+	UGameplayStatics::PlaySoundAtLocation(
+		GetWorld(),
+		GunShotSound,
+		this->GetActorLocation()
+	);
 	FVector CameraLocation;
 	FRotator CameraRotation;
 	ControllerRef->GetPlayerViewPoint(CameraLocation, CameraRotation);
@@ -158,7 +168,17 @@ float APlayerCharacter::TakeDamage(float DamageAmount, struct FDamageEvent const
 	if (Health <= 0) {
 		if (this->GetController()->IsA(APC_PlayerController::StaticClass()))
 			Cast<AAssignmentGameModeBase>(UGameplayStatics::GetGameMode(this))->GameOver(false);
-		this->Destroy();
+		else {
+			APlayerCharacter* Player = Cast<APlayerCharacter>(EventInstigator->GetCharacter());
+			Player->Health += 20;
+			AEnemyAIController* AiController = Cast<AEnemyAIController>(this->GetController());
+			// If no enemies remain, go to game won screen.
+			if(AiController->GetCharacter()==nullptr)
+				Cast<AAssignmentGameModeBase>(UGameplayStatics::GetGameMode(this))->GameOver(true);
+		}
+		// Destroy character this way. For some reason it breaks when detroyed normally.
+		this->DetachFromControllerPendingDestroy();
+		this->SetLifeSpan(0.1f);
 	}
 	return DamageAmount;
 } 
@@ -182,7 +202,7 @@ void APlayerCharacter::ThrowGrenade() {
 	APC_PlayerController* playerController = Cast<APC_PlayerController>(ControllerRef);
 	int grenades = playerController->GetGrenades();
 	if (grenades > 0)
-		playerController->SetGrenades(grenades - 1);
+		playerController->SetGrenades(--grenades);
 	else
 		return;
 	if (GrenadeClass) {

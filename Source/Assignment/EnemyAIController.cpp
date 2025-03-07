@@ -2,13 +2,12 @@
 
 
 #include "EnemyAIController.h"
-#include "Kismet/GameplayStatics.h"
 
+/*
+* BeginPlay function
+* Loads behaviour tree for ai. 
+*/
 void AEnemyAIController::BeginPlay() {
 	Super::BeginPlay();
-	APawn* PlayerPawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
-	//SetFocus(PlayerPawn);
-	//MoveToActor(PlayerPawn, 10.0f);
 	RunBehaviorTree(BehaviourTree);
-	GetBlackboardComponent()->SetValueAsVector(TEXT("PlayerPosition"), PlayerPawn->GetActorLocation());
 }

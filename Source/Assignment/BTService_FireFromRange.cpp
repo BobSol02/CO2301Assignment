@@ -13,15 +13,18 @@
 void UBTService_FireFromRange::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds) {
 	Super::TickNode(OwnerComp, NodeMemory, DeltaSeconds);
 
+	bool LineOfSight = OwnerComp.GetBlackboardComponent()->GetValueAsBool("LineOfSight");
+
 	AAIController* EnemyAIController = OwnerComp.GetAIOwner();
 	APawn* PlayerPawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
 	
 	UE_LOG(LogTemp, Warning, TEXT("%s"), *FString::SanitizeFloat(EnemyAIController->GetPawn()->GetDistanceTo(PlayerPawn)));
 
-	if (EnemyAIController->GetPawn()->GetDistanceTo(PlayerPawn)<1000.0f) {
+	if (EnemyAIController->GetPawn()->GetDistanceTo(PlayerPawn)<1000.0f && LineOfSight) {
 		OwnerComp.GetBlackboardComponent()->SetValueAsBool(GetSelectedBlackboardKey(), true);
 	}
 	else {
 		OwnerComp.GetBlackboardComponent()->ClearValue(GetSelectedBlackboardKey());
+		OwnerComp.GetBlackboardComponent()->ClearValue("PlayerPosition");
 	}
 }
